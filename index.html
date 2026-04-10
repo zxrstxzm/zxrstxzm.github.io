@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zzuxbox UI Lab</title>
     <style>
-        /* 1. 全局样式设置 */
+        /* 1. 全局样式设置 - 极简主义核心 */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
-            /* Ins风经典的极简浅灰背景 */
-            background-color: #f7f7f7;
+            /* 唯美全屏渐变背景，比纯灰更有质感 */
+            background: linear-gradient(135deg, #e0e0e0 0%, #fdfdfd 100%);
+            /* Ins风首选字体栈，确保在所有设备上都清晰 */
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
             display: flex;
             justify-content: center;
@@ -20,20 +21,108 @@
             -webkit-font-smoothing: antialiased;
         }
 
-        /* 2. 居中容器 */
-        .container {
+        /* 2. 居中卡片样式 - 增加呼吸感和毛玻璃效果 */
+        .card {
+            background: rgba(255, 255, 255, 0.9);
+            padding: 4rem 3rem;
+            border-radius: 30px;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.05); /* 柔和阴影 */
             text-align: center;
-            width: 90%;
-            max-width: 450px;
+            backdrop-filter: blur(10px); /* 毛玻璃效果 */
+            border: 1px solid rgba(255,255,255,0.4);
+            max-width: 90%;
+            width: 420px;
         }
 
-        /* 3. 图标样式：使用你提供的 PixelPunk 链接 */
+        /* 3. 图标/GIF 样式 - 强制黑白处理，显高级 */
         .logo {
-            width: 100px;
-            height: 100px;
+            width: 120px;
+            height: 120px;
             margin-bottom: 30px;
-            filter: grayscale(1); /* 强制黑白处理，更高级 */
+            object-fit: contain; /* 确保图片不拉伸 */
+            filter: grayscale(1); /* 强制黑白处理，Ins冷淡风核心 */
             transition: all 0.5s ease;
+            opacity: 0.9;
+        }
+        
+        .logo:hover {
+            filter: grayscale(0); /* 鼠标经过或点击时恢复彩色 */
+            transform: scale(1.05);
+            opacity: 1;
+        }
+
+        /* 4. 文字排版 - 增加字间距和极简主义 */
+        .icon { font-size: 4rem; margin-bottom: 1rem; }
+        h1 {
+            font-size: 1.6rem;
+            font-weight: 700;
+            letter-spacing: 0.2rem; /* 字间距拉开更有设计感 */
+            color: #1a1a1a;
+            margin-bottom: 12px;
+            text-transform: uppercase; /* 强制大写更硬朗 */
+        }
+
+        .divider {
+            height: 1px;
+            width: 50px;
+            background-color: #333;
+            margin: 20px auto;
+        }
+
+        p {
+            font-size: 0.9rem;
+            color: #666;
+            letter-spacing: 0.05rem;
+            line-height: 1.8;
+            margin-bottom: 40px;
+        }
+
+        /* 5. 简约按钮/链接样式 */
+        .btn {
+            display: inline-block;
+            padding: 14px 35px;
+            border: 1px solid #1a1a1a;
+            background: none;
+            color: #1a1a1a;
+            text-decoration: none;
+            font-size: 0.8rem;
+            font-weight: 500;
+            letter-spacing: 0.1rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn:hover {
+            background-color: #1a1a1a;
+            color: #fff;
+        }
+
+        /* 6. 底部标注 - 极度克制 */
+        .footer {
+            margin-top: 60px;
+            font-size: 0.7rem;
+            color: #ccc;
+            letter-spacing: 0.1rem;
+        }
+    </style>
+</head>
+<body>
+
+    <div class="card">
+        <img src="https://cdn.pixelpunk.cc/f/4b2b31a898f14a36/mmexport1775619313684.gif" alt="Logo" class="logo">
+        
+        <h1>ZZUXBOX</h1>
+        <div class="divider"></div>
+        <p>A MINIMALIST SPACE FOR <br> UI / UX EXPLORATION</p>
+        
+        <a href="#" class="btn">UNDER CONSTRUCTION</a>
+
+        <div class="footer">
+            © 2026 ZXRSTXZM LAB.
+        </div>
+    </div>
+
+</body>
+</html>
             opacity: 0.9;
         }
         
