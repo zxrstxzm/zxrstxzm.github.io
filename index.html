@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Zzuxbox UI Lab</title>
     <style>
+        /* 1. 基础重置 - 必须全英文 */
         * { margin: 0; padding: 0; box-sizing: border-box; }
         
         body {
@@ -19,46 +20,107 @@
             position: relative;
         }
 
-        /* 弹幕样式 */
+        /* 2. 弹幕层 */
         .danmaku-container { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
         .danmaku-item {
-            position: absolute; white-space: nowrap; font-size: 0.9rem;
+            position: absolute; white-space: nowrap; font-size: 0.8rem;
             color: rgba(0, 0, 0, 0.05); letter-spacing: 0.1rem;
             animation: move-left linear forwards;
         }
-        /* 用户自己发的弹幕颜色深一点，更有成就感 */
         .user-danmaku { color: rgba(0, 0, 0, 0.4) !important; font-weight: bold; border-bottom: 1px solid rgba(0,0,0,0.1); }
-
         @keyframes move-left { from { left: 100%; } to { left: -200%; } }
 
-        /* 卡片样式 */
+        /* 3. 卡片层 */
         .card {
-            background: rgba(255, 255, 255, 0.95);
+            background: rgba(255, 255, 255, 0.98);
             padding: 3rem 2rem; border-radius: 24px;
             box-shadow: 0 10px 30px rgba(0,0,0,0.05);
             text-align: center; max-width: 90%; width: 380px;
-            z-index: 10; backdrop-filter: blur(5px);
+            z-index: 10; backdrop-filter: blur(10px);
         }
 
         .logo { width: 100px; height: 100px; margin-bottom: 25px; object-fit: contain; }
         h1 { font-size: 1.5rem; letter-spacing: 0.2rem; text-transform: uppercase; margin-bottom: 10px; }
         .divider { height: 1px; width: 40px; background-color: #e0e0e0; margin: 15px auto 25px; }
+        p { font-size: 0.8rem; color: #999; line-height: 1.6; }
 
-        /* 输入框区域 - 极简 Ins 风 */
+        /* 4. 底部输入区 */
         .input-area {
             position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%);
-            z-index: 100; display: flex; gap: 10px; opacity: 0.3; transition: opacity 0.3s;
+            z-index: 100; display: flex; gap: 10px; opacity: 0.4; transition: 0.3s;
         }
         .input-area:hover { opacity: 1; }
-        
         input {
             border: none; border-bottom: 1px solid #1a1a1a; background: none;
             padding: 5px 10px; font-size: 0.8rem; outline: none; width: 150px;
-            color: #1a1a1a;
         }
-        
         .send-btn {
             background: none; border: 1px solid #1a1a1a; padding: 4px 12px;
+            font-size: 0.7rem; cursor: pointer;
+        }
+        .send-btn:hover { background: #1a1a1a; color: #fff; }
+
+        /* 5. 点击特效 */
+        .click-ripple {
+            position: fixed; border: 1px solid rgba(0, 0, 0, 0.1); 
+            background: rgba(0, 0, 0, 0.02); border-radius: 50%;
+            pointer-events: none; transform: translate(-50%, -50%);
+            animation: ripple-effect 0.6s ease-out forwards; z-index: 1000;
+        }
+        @keyframes ripple-effect { 0% { width: 0; height: 0; opacity: 1; } 100% { width: 100px; height: 100px; opacity: 0; } }
+    </style>
+</head>
+<body>
+    <div class="danmaku-container" id="danmakuBox"></div>
+
+    <div class="card">
+        <img src="https://cdn.pixelpunk.cc/f/4b2b31a898f14a36/mmexport1775619313684.gif" alt="Logo" class="logo">
+        <h1>ZZUXBOX</h1>
+        <div class="divider"></div>
+        <p>LAB PHASE: 01<br>INTERACTION TEST</p>
+    </div>
+
+    <div class="input-area">
+        <input type="text" id="userInput" placeholder="Say something..." maxlength="20">
+        <button class="send-btn" onclick="sendMsg()">SEND</button>
+    </div>
+
+    <script>
+        const box = document.getElementById('danmakuBox');
+        const input = document.getElementById('userInput');
+        const defaultMsgs = ['HELLO WORLD', 'MINIMALIST', 'DESIGNING...', 'STAY CALM', 'AESTHETIC'];
+
+        function createDanmaku(text, isUser = false) {
+            const el = document.createElement('div');
+            el.className = 'danmaku-item' + (isUser ? ' user-danmaku' : '');
+            el.innerText = text;
+            const top = 10 + Math.random() * 80; 
+            const duration = isUser ? 7 : 12 + Math.random() * 10;
+            el.style.top = top + '%';
+            el.style.animationDuration = duration + 's';
+            box.appendChild(el);
+            setTimeout(() => el.remove(), duration * 1000);
+        }
+
+        function sendMsg() {
+            const val = input.value.trim();
+            if(val) { createDanmaku(val, true); input.value = ''; }
+        }
+
+        input.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMsg(); });
+        setInterval(() => createDanmaku(defaultMsgs[Math.floor(Math.random() * defaultMsgs.length)]), 4000);
+
+        document.addEventListener('click', (e) => {
+            if(e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') return;
+            const ripple = document.createElement('div');
+            ripple.className = 'click-ripple';
+            ripple.style.left = e.clientX + 'px'; ripple.style.top = e.clientY + 'px';
+            document.body.appendChild(ripple);
+            setTimeout(() => ripple.remove(), 600);
+        });
+    </script>
+</body>
+</html>
             font-size: 0.7rem; cursor: pointer; transition: 0.3s;
         }
         .send-btn:hover { background: #1a1a1a; color: #fff; }
