@@ -1,32 +1,36 @@
 <!DOCTYPE html>
-<html>
+<html lang="zh-CN" class="notranslate" translate="no">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="google" content="notranslate">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Zzuxbox UI Lab</title>
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { background-color: #f7f7f7; font-family: sans-serif; display: flex; justify-content: center; align-items: center; height: 100vh; overflow: hidden; position: relative; }
+        /* 核心样式：即便被翻译干扰也能最大程度保住布局 */
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { background-color: #f7f7f7; font-family: sans-serif; height: 100vh; display: flex; justify-content: center; align-items: center; overflow: hidden; position: relative; }
         
         /* 弹幕背景层 */
-        #danmakuBox { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; pointer-events: none; }
-        .danmaku-item { position: absolute; white-space: nowrap; font-size: 0.8rem; color: rgba(0,0,0,0.06); animation: move linear forwards; }
-        @keyframes move { from { left: 100%; } to { left: -150%; } }
+        #danmakuBox { position: absolute; inset: 0; z-index: 1; pointer-events: none; }
+        .dm-item { position: absolute; white-space: nowrap; font-size: 12px; color: rgba(0,0,0,0.07); animation: drift linear forwards; }
+        @keyframes drift { from { left: 110%; } to { left: -150%; } }
 
-        /* 中间的主卡片 */
-        .card { background: white; padding: 40px; border-radius: 20px; box-shadow: 0 10px 30px rgba(0,0,0,0.05); text-align: center; z-index: 10; width: 350px; }
-        .logo { width: 100px; margin-bottom: 20px; }
-        h1 { font-size: 1.4rem; letter-spacing: 3px; margin-bottom: 10px; }
-        p { font-size: 0.8rem; color: #999; line-height: 2; }
+        /* 中间卡片：增加强力 z-index 确保它永远在最前 */
+        .card { background: #fff; padding: 40px 30px; border-radius: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.06); text-align: center; z-index: 100; width: 340px; border: 1px solid rgba(0,0,0,0.03); }
+        .logo { width: 100px; height: 100px; margin-bottom: 20px; object-fit: contain; }
+        h1 { font-size: 1.4rem; letter-spacing: 4px; text-transform: uppercase; margin-bottom: 8px; }
+        .line { width: 30px; height: 1px; background: #000; margin: 15px auto; }
+        p { font-size: 11px; color: #aaa; letter-spacing: 1px; line-height: 1.8; }
 
-        /* 底部互动区 */
-        .footer-input { position: fixed; bottom: 30px; display: flex; gap: 10px; z-index: 20; }
-        input { border: none; border-bottom: 1px solid #ddd; background: none; padding: 5px; outline: none; font-size: 0.8rem; }
-        button { background: none; border: 1px solid #333; padding: 3px 10px; cursor: pointer; font-size: 0.7rem; }
+        /* 底部互动区：简约风 */
+        .footer-ui { position: fixed; bottom: 40px; display: flex; gap: 8px; z-index: 200; align-items: center; opacity: 0.5; transition: 0.3s; }
+        .footer-ui:focus-within { opacity: 1; }
+        input { border: none; border-bottom: 1px solid #ccc; background: transparent; padding: 6px; font-size: 12px; outline: none; width: 140px; }
+        button { background: #000; color: #fff; border: none; padding: 6px 12px; font-size: 10px; cursor: pointer; border-radius: 2px; }
 
-        /* 点击波纹 */
-        .ripple { position: fixed; border: 1px solid rgba(0,0,0,0.1); border-radius: 50%; pointer-events: none; transform: translate(-50%, -50%); animation: ripple-anim 0.5s ease-out forwards; }
-        @keyframes ripple-anim { 0% { width: 0; height: 0; opacity: 1; } 100% { width: 100px; height: 100px; opacity: 0; } }
+        /* 点击涟漪 */
+        .rip { position: fixed; border: 1px solid rgba(0,0,0,0.1); border-radius: 50%; pointer-events: none; transform: translate(-50%, -50%); animation: out 0.5s ease-out forwards; z-index: 999; }
+        @keyframes out { 0% { width: 0; height: 0; opacity: 1; } 100% { width: 120px; height: 120px; opacity: 0; } }
     </style>
 </head>
 <body>
@@ -34,235 +38,54 @@
     <div id="danmakuBox"></div>
 
     <div class="card">
-        <img src="https://cdn.pixelpunk.cc/f/4b2b31a898f14a36/mmexport1775619313684.gif" class="logo">
+        <img src="https://cdn.pixelpunk.cc/f/4b2b31a898f14a36/mmexport1775619313684.gif" class="logo" alt="logo">
         <h1>ZZUXBOX</h1>
+        <div class="line"></div>
         <p>LAB PHASE: 01<br>INTERACTION TEST</p>
     </div>
 
-    <div class="footer-input">
-        <input type="text" id="ipt" placeholder="Say something...">
+    <div class="footer-ui">
+        <input type="text" id="ipt" placeholder="Say something..." autocomplete="off">
         <button onclick="send()">SEND</button>
     </div>
 
     <script>
         const box = document.getElementById('danmakuBox');
-        function createMsg(txt) {
-            const div = document.createElement('div');
-            div.className = 'danmaku-item';
-            div.innerText = txt;
-            div.style.top = Math.random() * 90 + '%';
-            div.style.animationDuration = (Math.random() * 10 + 10) + 's';
-            box.appendChild(div);
-            setTimeout(() => div.remove(), 20000);
+        const ipt = document.getElementById('ipt');
+
+        function create(txt, isMe = false) {
+            const d = document.createElement('div');
+            d.className = 'dm-item';
+            if(isMe) { d.style.color = 'rgba(0,0,0,0.5)'; d.style.fontWeight = 'bold'; }
+            d.innerText = txt;
+            d.style.top = (Math.random() * 80 + 5) + '%';
+            const dur = isMe ? 6 : (Math.random() * 10 + 10);
+            d.style.animationDuration = dur + 's';
+            box.appendChild(d);
+            setTimeout(() => d.remove(), dur * 1000);
         }
 
         function send() {
-            const ipt = document.getElementById('ipt');
-            if(ipt.value) { createMsg(ipt.value); ipt.value = ''; }
+            if(ipt.value.trim()) { create(ipt.value.trim(), true); ipt.value = ''; }
         }
 
-        setInterval(() => createMsg('STAY CALM'), 4000);
+        // 初始弹幕
+        const seeds = ['STAY CALM', 'MINIMALIST', 'UI LAB', 'ZXRSTXZM', 'AESTHETIC'];
+        setInterval(() => create(seeds[Math.floor(Math.random()*seeds.length)]), 3500);
 
-        document.addEventListener('click', (e) => {
-            if(e.target.tagName === 'INPUT' || e.target.tagName === 'BUTTON') return;
+        // 点击特效
+        document.addEventListener('touchstart', (e) => {
+            if(e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') return;
             const r = document.createElement('div');
-            r.className = 'ripple';
-            r.style.left = e.clientX + 'px'; r.style.top = e.clientY + 'px';
+            r.className = 'rip';
+            r.style.left = e.touches[0].clientX + 'px';
+            r.style.top = e.touches[0].clientY + 'px';
             document.body.appendChild(r);
             setTimeout(() => r.remove(), 500);
         });
-    </script>
-</body>
-</html>
-
-        /* 5. 点击特效 */
-        .click-ripple {
-            position: fixed; border: 1px solid rgba(0, 0, 0, 0.1); 
-            background: rgba(0, 0, 0, 0.02); border-radius: 50%;
-            pointer-events: none; transform: translate(-50%, -50%);
-            animation: ripple-effect 0.6s ease-out forwards; z-index: 1000;
-        }
-        @keyframes ripple-effect { 0% { width: 0; height: 0; opacity: 1; } 100% { width: 100px; height: 100px; opacity: 0; } }
-    </style>
-</head>
-<body>
-    <div class="danmaku-container" id="danmakuBox"></div>
-
-    <div class="card">
-        <img src="https://cdn.pixelpunk.cc/f/4b2b31a898f14a36/mmexport1775619313684.gif" alt="Logo" class="logo">
-        <h1>ZZUXBOX</h1>
-        <div class="divider"></div>
-        <p>LAB PHASE: 01<br>INTERACTION TEST</p>
-    </div>
-
-    <div class="input-area">
-        <input type="text" id="userInput" placeholder="Say something..." maxlength="20">
-        <button class="send-btn" onclick="sendMsg()">SEND</button>
-    </div>
-
-    <script>
-        const box = document.getElementById('danmakuBox');
-        const input = document.getElementById('userInput');
-        const defaultMsgs = ['HELLO WORLD', 'MINIMALIST', 'DESIGNING...', 'STAY CALM', 'AESTHETIC'];
-
-        function createDanmaku(text, isUser = false) {
-            const el = document.createElement('div');
-            el.className = 'danmaku-item' + (isUser ? ' user-danmaku' : '');
-            el.innerText = text;
-            const top = 10 + Math.random() * 80; 
-            const duration = isUser ? 7 : 12 + Math.random() * 10;
-            el.style.top = top + '%';
-            el.style.animationDuration = duration + 's';
-            box.appendChild(el);
-            setTimeout(() => el.remove(), duration * 1000);
-        }
-
-        function sendMsg() {
-            const val = input.value.trim();
-            if(val) { createDanmaku(val, true); input.value = ''; }
-        }
-
-        input.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMsg(); });
-        setInterval(() => createDanmaku(defaultMsgs[Math.floor(Math.random() * defaultMsgs.length)]), 4000);
-
-        document.addEventListener('click', (e) => {
-            if(e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') return;
-            const ripple = document.createElement('div');
-            ripple.className = 'click-ripple';
-            ripple.style.left = e.clientX + 'px'; ripple.style.top = e.clientY + 'px';
-            document.body.appendChild(ripple);
-            setTimeout(() => ripple.remove(), 600);
-        });
-    </script>
-</body>
-</html>
-            font-size: 0.7rem; cursor: pointer; transition: 0.3s;
-        }
-        .send-btn:hover { background: #1a1a1a; color: #fff; }
-
-        .click-ripple {
-            position: fixed; border: 1px solid rgba(0, 0, 0, 0.1); 
-            background: rgba(0, 0, 0, 0.02); border-radius: 50%;
-            pointer-events: none; transform: translate(-50%, -50%);
-            animation: ripple-effect 0.6s ease-out forwards; z-index: 1000;
-        }
-        @keyframes ripple-effect { 0% { width: 0; height: 0; opacity: 1; } 100% { width: 100px; height: 100px; opacity: 0; } }
-    </style>
-</head>
-<body>
-
-    <div class="danmaku-container" id="danmakuBox"></div>
-
-    <div class="card">
-        <img src="https://cdn.pixelpunk.cc/f/4b2b31a898f14a36/mmexport1775619313684.gif" alt="Logo" class="logo">
-        <h1>ZZUXBOX</h1>
-        <div class="divider"></div>
-        <p style="font-size: 0.8rem; color: #999;">LAB PHASE: 01<br>INTERACTION TEST</p>
-    </div>
-
-    <div class="input-area">
-        <input type="text" id="userInput" placeholder="Say something..." maxlength="20">
-        <button class="send-btn" onclick="sendMsg()">SEND</button>
-    </div>
-
-    <script>
-        const box = document.getElementById('danmakuBox');
-        const input = document.getElementById('userInput');
-        const defaultMsgs = ['HELLO WORLD', 'UI LAB', 'MINIMALIST', 'DESIGNING...', 'ZXRSTXZM', 'AESTHETIC', 'STAY CALM'];
-
-        function createDanmaku(text, isUser = false) {
-            const el = document.createElement('div');
-            el.className = 'danmaku-item' + (isUser ? ' user-danmaku' : '');
-            el.innerText = text;
-            
-            const top = 10 + Math.random() * 80; 
-            const duration = isUser ? 8 : 12 + Math.random() * 10;
-            
-            el.style.top = top + '%';
-            el.style.animationDuration = duration + 's';
-            if(!isUser) el.style.opacity = (Math.random() * 0.1).toString();
-
-            box.appendChild(el);
-            setTimeout(() => { el.remove(); }, duration * 1000);
-        }
-
-        // 发送逻辑
-        function sendMsg() {
-            const val = input.value.trim();
-            if(val) {
-                createDanmaku(val, true);
-                input.value = '';
-            }
-        }
-
-        // 回车发送
-        input.addEventListener('keypress', (e) => { if(e.key === 'Enter') sendMsg(); });
-
-        // 定时生成背景弹幕
-        setInterval(() => createDanmaku(defaultMsgs[Math.floor(Math.random() * defaultMsgs.length)]), 3000);
-
-        // 点击特效
-        document.addEventListener('click', (e) => {
-            if(e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT') return;
-            const ripple = document.createElement('div');
-            ripple.className = 'click-ripple';
-            ripple.style.left = e.clientX + 'px'; ripple.style.top = e.clientY + 'px';
-            document.body.appendChild(ripple);
-            setTimeout(() => { ripple.remove(); }, 600);
-        });
-    </script>
-</body>
-</html>
-            color: #666;
-            letter-spacing: 0.05rem;
-            line-height: 1.8;
-            margin-bottom: 35px;
-        }
-
-        /* 5. 简约细线按钮样式 */
-        .btn {
-            display: inline-block;
-            padding: 12px 30px;
-            border: 1px solid #1a1a1a;
-            background: none;
-            color: #1a1a1a;
-            text-decoration: none;
-            font-size: 0.75rem;
-            font-weight: 600;
-            letter-spacing: 0.1rem;
-            border-radius: 4px; /* 按钮微圆角 */
-            transition: all 0.3s ease;
-        }
-
-        .btn:hover {
-            background-color: #1a1a1a;
-            color: white;
-        }
-
-        /* 6. 底部标注 */
-        .footer {
-            margin-top: 50px;
-            font-size: 0.7rem;
-            color: #ccc;
-            letter-spacing: 0.1rem;
-        }
-    </style>
-</head>
-<body>
-
-    <div class="card">
-        <img src="https://cdn.pixelpunk.cc/f/4b2b31a898f14a36/mmexport1775619313684.gif" alt="Zzuxbox Logo" class="logo">
         
-        <h1>ZZUXBOX</h1>
-        <div class="divider"></div>
-        <p>A MINIMALIST SPACE FOR <br> UI / UX EXPLORATION</p>
-        
-        <a href="#" class="btn">COMING SOON</a>
-
-        <div class="footer">
-            © 2026 某神秘大师 LAB.
-        </div>
-    </div>
-
+        ipt.addEventListener('keyup', (e) => { if(e.key === 'Enter') send(); });
+    </script>
 </body>
 </html>
+
