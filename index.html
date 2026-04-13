@@ -18,13 +18,13 @@
             white-space: nowrap;
             /* 强制楷体 */
             font-family: "STKaiti", "楷体", "KaiTi", serif;
-            font-size: 15rem; /* 字号极其巨大（约240px） */
+            font-size: clamp(3.8rem, 10vw, 9rem);
             font-weight: 900; /* 最重权重 */
             color: rgba(0,0,0,0.15); /* 极淡的黑色，作为水墨背景层 */
             /* 去掉所有背景、边框、阴影 */
             background: none; border: none; padding: 0; box-shadow: none;
-            
-            letter-spacing: 2rem; /* 字间距拉开更有设计感 */
+
+            letter-spacing: clamp(0.4rem, 1.6vw, 1.2rem);
             animation: move-left linear forwards;
             line-height: 1;
         }
@@ -32,13 +32,13 @@
         /* 用户自己发的弹幕 - 颜色深一点，更有成就感 */
         .user-danmaku {
             color: rgba(0,0,0,0.6) !important;
-            font-size: 10rem !important; /* 用户发的稍小一点，防止溢出太严重 */
+            font-size: clamp(3rem, 8vw, 6rem) !important;
             font-weight: 900 !important;
         }
 
         @keyframes move-left {
             from { left: 100%; }
-            to { left: -1000%; } /* 字太大，飘远点防止截断 */
+            to { left: -240%; }
         }
 
         /* 4. 中间卡片样式 */
@@ -46,7 +46,7 @@
         .logo { width: 100px; height: 100px; margin-bottom: 20px; object-fit: contain; }
         h1 { font-size: 1.4rem; letter-spacing: 4px; text-transform: uppercase; }
         .line { width: 30px; height: 1px; background: #000; margin: 15px auto; }
-        p { font-size: 11px; color: #aaa; }
+        p { font-size: 11px; color: #aaa; line-height: 1.8; }
 
         /* 5. 底部互动 */
         .footer-ui { position: fixed; bottom: 40px; display: flex; gap: 8px; z-index: 200; }
@@ -66,7 +66,7 @@
         <img src="https://cdn.pixelpunk.cc/f/4b2b31a898f14a36/mmexport1775619313684.gif" class="logo" alt="logo">
         <h1>ZZUXBOX</h1>
         <div class="line"></div>
-        <p>LAB PHASE: 03<br>GIANT KAITI DRIVING</p>
+        <p>新域名刚亮起<br>把没说完的话都交给夜色</p>
     </div>
 
     <div class="footer-ui">
@@ -83,11 +83,11 @@
             d.className = 'dm-item' + (isUser ? ' user-danmaku' : '');
             d.innerText = txt;
             
-            // 随机高度：0-85% 之间
-            d.style.top = (Math.random() * 85) + '%';
-            
-            // 随机速度：大字越慢越霸气
-            const dur = isUser ? 10 : 15 + Math.random() * 15;
+            // 全屏铺满：允许从顶部到接近底部随机出现
+            d.style.top = (Math.random() * 96) + '%';
+
+            // 全屏弹幕移动得更慢，停留时间更长
+            const dur = isUser ? 22 : 28 + Math.random() * 18;
             d.style.animationDuration = dur + 's';
             
             // 背景层弹幕随机透明度
@@ -106,10 +106,19 @@
         }
 
         // 默认循环弹幕
-        const seeds = ['极简楷体', 'UI实验', '你好世界', '代码艺术', '楷体大字'];
-        setInterval(() => create(seeds[Math.floor(Math.random()*seeds.length)]), 3000);
+        const seeds = [
+            '人群散场了 我还站在原地',
+            '新域名亮起来 像心事终于有了地址',
+            '把情绪挂在风里 慢慢等天黑',
+            '有些话不发出去 也会在夜里循环播放',
+            '页面还没写完 失眠已经先加载了',
+            '欢迎来到我的角落 这里收留没说出口的难过',
+            '月亮不回消息 我就让弹幕替我漂过去',
+            '如果思念有轨迹 大概就是这一整屏缓慢路过'
+        ];
+        setInterval(() => create(seeds[Math.floor(Math.random()*seeds.length)]), 1400);
         // 初始先生成几条
-        for(let i=0; i<3; i++) create(seeds[i]);
+        for(let i=0; i<12; i++) create(seeds[i % seeds.length]);
 
         // 回车发送
         ipt.addEventListener('keyup', (e) => { if(e.key === 'Enter') send(); });
