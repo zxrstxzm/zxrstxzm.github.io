@@ -930,6 +930,7 @@
             `有一串字母落在风里：${inviteCode}`,
             `今晚真正的暗号只是 ${inviteCode}`
         ];
+        let clueIndex = 0;
         let currentTrack = 0;
         let keyHintRevealed = false;
 
@@ -1117,27 +1118,28 @@
         });
 
         const seeds = [
-            '人群散场了 我还站在原地',
-            '新域名亮起来 像心事终于有了地址',
-            '把情绪挂在风里 慢慢等天黑',
-            '有些话不发出去 也会在夜里循环播放',
-            '页面还没写完 失眠已经先加载了',
-            '欢迎来到我的角落 这里收留没说出口的难过',
-            '月亮不回消息 我就让弹幕替我漂过去',
-            '如果思念有轨迹 大概就是这一整屏缓慢路过',
-            '今天也没有变好 但先把门牌挂上去',
-            '输入框里空着 夜里却已经写满了字'
+            '楼下的风吹了一夜，窗帘到天亮都没安静下来',
+            '昨天写到一半的话，还停在这个页面里',
+            '灯一直没关，像是在等谁回来坐一会儿',
+            '深夜的房间有种旧电影暂停后的安静',
+            '外面已经很晚了，巷口那盏灯还亮着',
+            '耳机里那首歌播完的时候，天刚好有一点白',
+            '有些心事说不出口，就让它从背景里慢慢飘过去',
+            '今晚没发生什么，只是风比平时更凉一点',
+            '我把名字写在新门牌上，心里却还是空了一小块',
+            '这一页先留白，剩下的话以后再慢慢补'
         ];
 
         setInterval(() => create(seeds[Math.floor(Math.random() * seeds.length)]), 1500);
-        setInterval(() => create(clueSeeds[Math.floor(Math.random() * clueSeeds.length)], false, true), 10000);
+        setInterval(() => {
+            create(clueSeeds[clueIndex % clueSeeds.length], false, true);
+            clueIndex += 1;
+        }, 20000);
 
         for (let i = 0; i < 10; i++) {
             create(seeds[i % seeds.length]);
         }
-        for (let i = 0; i < 2; i++) {
-            create(clueSeeds[i % clueSeeds.length], false, true);
-        }
+        create(clueSeeds[0], false, true);
 
         document.addEventListener('mousedown', (e) => {
             if (e.target.tagName === 'BUTTON' || e.target.tagName === 'INPUT' || e.target.closest('.entry-card')) return;
