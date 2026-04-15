@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Zzuxbox Home</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=Ma+Shan+Zheng&family=Zhi+Mang+Xing&display=swap');
+
+        :root {
+            --bg: #f6f5f1;
+            --text: #151515;
+            --soft: rgba(21, 21, 21, 0.56);
+            --line: rgba(255, 255, 255, 0.36);
+            --line-dark: rgba(21, 21, 21, 0.08);
+            --glass: rgba(255, 255, 255, 0.32);
+            --shadow: 0 24px 80px rgba(0, 0, 0, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: "Manrope", sans-serif;
+            min-height: 100vh;
+            color: var(--text);
+            overflow: hidden;
+            background:
+                radial-gradient(circle at 18% 20%, rgba(255, 255, 255, 0.94), transparent 24%),
+                radial-gradient(circle at 82% 12%, rgba(0, 0, 0, 0.03), transparent 18%),
+                radial-gradient(circle at 20% 82%, rgba(255, 255, 255, 0.7), transparent 22%),
+                linear-gradient(180deg, #fbfbfa 0%, var(--bg) 100%);
+            display: grid;
+            place-items: center;
+            padding: 1rem;
+        }
+
+        .home-shell {
+            width: min(92vw, 580px);
+            min-height: min(70vh, 420px);
+            perspective: 1600px;
+        }
+
+        .home-shell-inner {
+            width: 100%;
+            min-height: min(70vh, 420px);
+            position: relative;
+        }
+
+        .flip-card {
+            position: relative;
+            width: 100%;
+            min-height: min(70vh, 420px);
+            transform-style: preserve-3d;
+            transition: transform 0.78s cubic-bezier(0.2, 0.8, 0.2, 1);
+        }
+
+        .card-face {
+            position: absolute;
+            inset: 0;
+            border-radius: 32px;
+            border: none;
+            background: rgba(255, 255, 255, 0.24);
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.08), inset 0 0 0 1px rgba(255, 255, 255, 0);
+            backdrop-filter: blur(20px) saturate(1.02);
+            -webkit-backdrop-filter: blur(20px) saturate(1.02);
+            display: grid;
+            place-items: center;
+            padding: clamp(1.6rem, 4vw, 2.5rem);
+            overflow: hidden;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
+        }
+
+        .home-card {
+            z-index: 1;
+            display: grid;
+            place-items: center;
+            gap: 1rem;
+            text-align: center;
+            transform: translateZ(44px);
+        }
+
+        .home-back {
+            display: grid;
+            place-items: center;
+            transform: rotateY(180deg) translateZ(2px);
+            z-index: 1;
+        }
+
+        .home-back-inner {
+            display: grid;
+            gap: 0.75rem;
+            justify-items: center;
+            text-align: center;
+        }
+
+        .home-back span {
+            font-size: 0.72rem;
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: rgba(21, 21, 21, 0.44);
+        }
+
+        .home-back p {
+            max-width: 18rem;
+            font-size: 0.92rem;
+            line-height: 1.9;
+            font-family: "Ma Shan Zheng", "KaiTi", cursive;
+            color: rgba(21, 21, 21, 0.64);
+        }
+
+        h1 {
+            font-size: clamp(2.2rem, 7vw, 4.8rem);
+            line-height: 0.94;
+            letter-spacing: -0.08em;
+            font-family: "Zhi Mang Xing", "HanziPen SC", cursive;
+            font-weight: 400;
+            color: #b56d57;
+            text-shadow: 0 12px 32px rgba(181, 109, 87, 0.18);
+            animation: breathe 4.4s ease-in-out infinite;
+            text-wrap: balance;
+        }
+
+        .home-link {
+            text-decoration: none;
+            color: rgba(21, 21, 21, 0.68);
+            font-size: 0.78rem;
+            letter-spacing: 0.16em;
+            text-transform: uppercase;
+            padding-bottom: 0.2rem;
+            border-bottom: 1px solid var(--line-dark);
+        }
+
+        .music-player {
+            position: fixed;
+            right: 1.2rem;
+            bottom: 1.2rem;
+            z-index: 21;
+        }
+
+        .music-player::after {
+            content: attr(data-track);
+            position: absolute;
+            right: calc(100% + 0.6rem);
+            top: 50%;
+            transform: translateY(-50%);
+            max-width: 180px;
+            padding: 0.38rem 0.62rem;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.46);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            backdrop-filter: blur(10px);
+            color: rgba(21, 21, 21, 0.56);
+            font-size: 0.68rem;
+            letter-spacing: 0.04em;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.2s ease, transform 0.2s ease;
+        }
+
+        .music-player:hover::after,
+        .music-player.is-playing::after {
+            opacity: 1;
+            transform: translateY(-50%) translateX(-2px);
+        }
+
+        .music-toggle {
+            width: 46px;
+            height: 46px;
+            border: 1px solid rgba(255, 255, 255, 0.32);
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.42);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 14px 32px rgba(0, 0, 0, 0.07);
+            color: #151515;
+            cursor: pointer;
+            position: relative;
+            transition: transform 0.2s ease, background 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .music-toggle:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 18px 36px rgba(0, 0, 0, 0.09);
+        }
+
+        .music-toggle span {
+            position: absolute;
+            inset: 0;
+            border-radius: 999px;
+            pointer-events: none;
+        }
+
+        .music-toggle .ring,
+        .music-toggle .ring::before,
+        .music-toggle .ring::after {
+            content: "";
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+        }
+
+        .music-toggle .ring {
+            border: 1px solid rgba(21, 21, 21, 0.08);
+            opacity: 0;
+            transform: scale(0.88);
+        }
+
+        .music-player.is-playing .music-toggle .ring {
+            animation: musicPulse 2.6s ease-out infinite;
+        }
+
+        .music-player.is-playing .music-toggle .ring::before {
+            inset: -5px;
+            border: 1px solid rgba(21, 21, 21, 0.06);
+            animation: musicPulse 2.6s ease-out infinite 0.45s;
+        }
+
+        .music-player.is-playing .music-toggle .ring::after {
+            inset: -10px;
+            border: 1px solid rgba(21, 21, 21, 0.04);
+            animation: musicPulse 2.6s ease-out infinite 0.9s;
+        }
+
+        .music-toggle::before,
+        .music-toggle::after {
+            content: "";
+            position: absolute;
+            left: 50%;
+            top: 50%;
+            transform: translate(-50%, -50%);
+            transition: opacity 0.18s ease, transform 0.18s ease;
+        }
+
+        .music-toggle::before {
+            width: 0;
+            height: 0;
+            margin-left: 1px;
+            border-top: 7px solid transparent;
+            border-bottom: 7px solid transparent;
+            border-left: 11px solid currentColor;
+        }
+
+        .music-toggle::after {
+            width: 12px;
+            height: 14px;
+            background: linear-gradient(90deg, currentColor 0 34%, transparent 34% 66%, currentColor 66% 100%);
+            opacity: 0;
+        }
+
+        .music-player.is-playing .music-toggle::before {
+            opacity: 0;
+            transform: translate(-50%, -50%) scale(0.9);
+        }
+
+        .music-player.is-playing .music-toggle::after {
+            opacity: 1;
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .music-player.is-playing .music-toggle {
+            background: rgba(255, 255, 255, 0.58);
+            animation: musicFloat 3.2s ease-in-out infinite;
+        }
+
+        .home-shell.is-flipped .flip-card {
+            transform: rotateY(180deg);
+        }
+
+        @keyframes breathe {
+            0%,
+            100% {
+                opacity: 0.88;
+                transform: scale(0.992);
+            }
+            50% {
+                opacity: 1;
+                transform: scale(1.012);
+            }
+        }
+
+        @keyframes musicPulse {
+            0% {
+                opacity: 0;
+                transform: scale(0.88);
+            }
+            18% {
+                opacity: 0.42;
+            }
+            100% {
+                opacity: 0;
+                transform: scale(1.42);
+            }
+        }
+
+        @keyframes musicFloat {
+            0%,
+            100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-2px);
+            }
+        }
+
+        @media (max-width: 640px) {
+            body {
+                padding: 0.9rem;
+            }
+
+            .home-shell {
+                width: 100%;
+                min-height: auto;
+            }
+
+            .home-shell-inner {
+                min-height: 58vh;
+                border-radius: 26px;
+            }
+
+            .music-player {
+                right: 1rem;
+                bottom: 1rem;
+            }
+
+            .music-player::after {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <main class="home-shell" id="homeShell">
+        <section class="home-shell-inner">
+            <div class="flip-card" id="homeCard3d">
+                <section class="card-face">
+                    <section class="home-card">
+                        <h1>你已经穿过那道安静的门。</h1>
+                        <a class="home-link" href="index.html">Back</a>
+                    </section>
+                </section>
+                <section class="card-face home-back" aria-hidden="true">
+                    <div class="home-back-inner">
+                        <span>midnight side</span>
+                        <p>翻到这一面时，风声更轻了，像有人把漂泊收好，只把温柔留在你手心里。</p>
+                    </div>
+                </section>
+            </div>
+        </section>
+    </main>
+
+    <div class="music-player" id="musicPlayer" data-track="Trap Sad">
+        <button class="music-toggle" id="musicToggle" type="button" aria-label="播放或暂停音乐"><span class="ring"></span></button>
+        <audio id="bgm" preload="metadata"></audio>
+    </div>
+
+    <script>
+        const homeShell = document.getElementById('homeShell');
+        const homeCard3d = document.getElementById('homeCard3d');
+        const musicPlayer = document.getElementById('musicPlayer');
+        const musicToggle = document.getElementById('musicToggle');
+        const bgm = document.getElementById('bgm');
+        const storageKey = 'zzuxbox-bgm-state';
+        const playlist = [
+            { title: 'Trap Sad', src: 'assets/mixkit-trap-sad-266.mp3' },
+            { title: 'Classical Vibes', src: 'assets/mixkit-classical-vibes-5-688.mp3' },
+            { title: 'RNB 2', src: 'assets/mixkit-rnb-2-226.mp3' },
+            { title: 'Serene View', src: 'assets/mixkit-serene-view-443.mp3' }
+        ];
+        let currentTrack = 0;
+        let flipTimer = null;
+        let isFlipped = false;
+
+        function saveMusicState() {
+            const payload = {
+                track: currentTrack,
+                currentTime: Number.isFinite(bgm.currentTime) ? bgm.currentTime : 0,
+                playing: !bgm.paused
+            };
+            localStorage.setItem(storageKey, JSON.stringify(payload));
+        }
+
+        function restoreMusicState() {
+            try {
+                const raw = localStorage.getItem(storageKey);
+                if (!raw) return false;
+                const state = JSON.parse(raw);
+                if (typeof state.track === 'number') currentTrack = state.track;
+                loadTrack(currentTrack);
+                const resume = () => {
+                    if (typeof state.currentTime === 'number' && state.currentTime > 0) {
+                        bgm.currentTime = Math.min(state.currentTime, bgm.duration || state.currentTime);
+                    }
+                    if (state.playing) {
+                        bgm.play().catch(() => {});
+                    }
+                    syncMusicUI();
+                    bgm.removeEventListener('loadedmetadata', resume);
+                };
+                bgm.addEventListener('loadedmetadata', resume);
+                return true;
+            } catch {
+                return false;
+            }
+        }
+
+        function loadTrack(index) {
+            currentTrack = (index + playlist.length) % playlist.length;
+            bgm.src = playlist[currentTrack].src;
+            musicPlayer.dataset.track = playlist[currentTrack].title;
+            bgm.load();
+            saveMusicState();
+        }
+
+        function syncMusicUI() {
+            musicPlayer.classList.toggle('is-playing', !bgm.paused);
+            saveMusicState();
+        }
+
+        async function toggleMusic() {
+            try {
+                if (!bgm.src) loadTrack(currentTrack);
+                if (bgm.paused) {
+                    await bgm.play();
+                } else {
+                    bgm.pause();
+                }
+                syncMusicUI();
+            } catch {}
+        }
+
+        async function playNextTrack() {
+            loadTrack(currentTrack + 1);
+            try {
+                await bgm.play();
+            } catch {}
+            syncMusicUI();
+        }
+
+        function renderCardTransform(tiltX = 0) {
+            const flip = isFlipped ? 180 : 0;
+            homeCard3d.style.transform = `rotateX(${tiltX.toFixed(2)}deg) rotateY(${flip}deg)`;
+            homeCard3d.style.boxShadow = `0 ${18 + tiltX * 0.8}px 80px rgba(0, 0, 0, 0.1)`;
+        }
+
+        function handleCardMove(event) {
+            const rect = homeShell.getBoundingClientRect();
+            const px = (event.clientX - rect.left) / rect.width;
+            const py = (event.clientY - rect.top) / rect.height;
+            const rotateX = (0.5 - py) * 8;
+            renderCardTransform(rotateX);
+
+            if (px > 0.72) {
+                isFlipped = true;
+                homeShell.classList.add('is-flipped');
+                renderCardTransform(rotateX);
+                clearTimeout(flipTimer);
+                flipTimer = setTimeout(() => {
+                    isFlipped = false;
+                    homeShell.classList.remove('is-flipped');
+                    renderCardTransform(0);
+                }, 1800);
+            } else if (px < 0.38) {
+                isFlipped = false;
+                homeShell.classList.remove('is-flipped');
+                renderCardTransform(rotateX);
+            }
+        }
+
+        function resetCardMove() {
+            isFlipped = false;
+            homeShell.classList.remove('is-flipped');
+            homeCard3d.style.boxShadow = '0 24px 80px rgba(0, 0, 0, 0.08)';
+            renderCardTransform(0);
+        }
+
+        musicToggle.addEventListener('click', toggleMusic);
+        bgm.addEventListener('loadedmetadata', syncMusicUI);
+        bgm.addEventListener('play', syncMusicUI);
+        bgm.addEventListener('pause', syncMusicUI);
+        bgm.addEventListener('timeupdate', saveMusicState);
+        bgm.addEventListener('ended', playNextTrack);
+        homeShell.addEventListener('mousemove', handleCardMove);
+        homeShell.addEventListener('mouseleave', resetCardMove);
+
+        if (!restoreMusicState()) loadTrack(0);
+        syncMusicUI();
+        resetCardMove();
+    </script>
+</body>
+</html>
