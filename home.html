@@ -376,6 +376,7 @@
         let currentTrack = 0;
         let flipTimer = null;
         let isFlipped = false;
+        let pendingResume = false;
 
         function saveMusicState() {
             const payload = {
@@ -393,21 +394,36 @@
                 const state = JSON.parse(raw);
                 if (typeof state.track === 'number') currentTrack = state.track;
                 loadTrack(currentTrack);
-                const resume = () => {
+                pendingResume = !!state.playing;
+                const resume = async () => {
                     if (typeof state.currentTime === 'number' && state.currentTime > 0) {
                         bgm.currentTime = Math.min(state.currentTime, bgm.duration || state.currentTime);
                     }
                     if (state.playing) {
-                        bgm.play().catch(() => {});
+                        try {
+                            await bgm.play();
+                            pendingResume = false;
+                        } catch {}
                     }
                     syncMusicUI();
                     bgm.removeEventListener('loadedmetadata', resume);
+                    bgm.removeEventListener('canplay', resume);
                 };
                 bgm.addEventListener('loadedmetadata', resume);
+                bgm.addEventListener('canplay', resume);
                 return true;
             } catch {
                 return false;
             }
+        }
+
+        async function tryResumePlayback() {
+            if (!pendingResume || !bgm.paused) return;
+            try {
+                await bgm.play();
+                pendingResume = false;
+            } catch {}
+            syncMusicUI();
         }
 
         function loadTrack(index) {
@@ -486,8 +502,12 @@
         bgm.addEventListener('pause', syncMusicUI);
         bgm.addEventListener('timeupdate', saveMusicState);
         bgm.addEventListener('ended', playNextTrack);
+        bgm.addEventListener('canplay', tryResumePlayback);
         homeShell.addEventListener('mousemove', handleCardMove);
         homeShell.addEventListener('mouseleave', resetCardMove);
+        window.addEventListener('pageshow', tryResumePlayback);
+        document.addEventListener('click', tryResumePlayback, { passive: true });
+        document.addEventListener('keydown', tryResumePlayback);
 
         if (!restoreMusicState()) loadTrack(0);
         syncMusicUI();

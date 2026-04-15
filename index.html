@@ -984,12 +984,15 @@
         }
 
         function create(txt, isUser = false, isClue = false) {
+            if (isClue) {
+                box.querySelectorAll('.dm-item.is-clue').forEach((node) => node.remove());
+            }
             const d = document.createElement('div');
             d.className = 'dm-item' + (isUser ? ' user-danmaku' : '') + (isClue ? ' is-clue' : '');
             d.innerText = txt;
             d.style.top = (Math.random() * 88) + '%';
 
-            const dur = isUser ? 18 + Math.random() * 8 : 26 + Math.random() * 18;
+            const dur = isClue ? 16 : isUser ? 18 + Math.random() * 8 : 26 + Math.random() * 18;
             const scale = isUser ? 0.94 + Math.random() * 0.18 : 0.68 + Math.random() * 0.55;
             const rotate = -9 + Math.random() * 18;
             const driftY = -14 + Math.random() * 28;
